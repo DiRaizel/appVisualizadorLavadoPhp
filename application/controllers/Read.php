@@ -28,9 +28,17 @@ class Read extends CI_Controller {
     }
     
     //
-    function cargarTurno() {
+    function cargarPersonas() {
         //
-        $rsp = $this->Visualizador->cargarTurno();
+        $rsp = $this->Visualizador->cargarPersonas();
+        //
+        echo json_encode($rsp);
+    }
+    
+    //
+    function consultarPersona() {
+        //
+        $rsp = $this->Visualizador->consultarPersona();
         //
         echo json_encode($rsp);
     }
@@ -43,11 +51,18 @@ class Read extends CI_Controller {
         echo json_encode($rsp);
     }
     
-    
     //
     function cargarVideos() {
         //
         $rsp = $this->Visualizador->cargarVideos();
+        //
+        echo json_encode($rsp);
+    }
+    
+    //
+    function cargarMensajes() {
+        //
+        $rsp = $this->Visualizador->cargarMensajes();
         //
         echo json_encode($rsp);
     }

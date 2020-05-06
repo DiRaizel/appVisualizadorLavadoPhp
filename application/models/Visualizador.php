@@ -31,7 +31,7 @@ class Visualizador extends CI_Model {
             return 2;
         }
     }
-    
+
     //
     function cargarListaVisualizadores() {
         //
@@ -56,14 +56,13 @@ class Visualizador extends CI_Model {
     }
 
     //
-    function cargarTurno() {
+    function cargarPersonas() {
         //
         $visualizador = $this->input->post("visualizador");
         $empresa = $this->input->post("empresa");
         //
-        $query = $this->db->query("select IdTv, NombrePaciente, Modulo, "
-                . "Servicio, Turno, Descripcion, Estado from tv where IdTv = "
-                . "(select MIN(IdTv) from tv WHERE Estado = $visualizador and emp_id = $empresa)");
+        $query = $this->db->query("select per_id, per_nombre, per_estado from "
+                . "personas_temp WHERE vis_id = $visualizador and emp_id = $empresa");
         //
         $datos = array();
         //
@@ -71,33 +70,44 @@ class Visualizador extends CI_Model {
             //
             foreach ($query->result() as $row) {
                 //
-                $tipo = '';
+                array_push($datos, array(
+                    'idPer' => $row->per_id,
+                    'nombre' => $row->per_nombre,
+                    'estado' => $row->per_estado
+                ));
+            }
+            //
+            return $datos;
+        } else {
+            //
+            return 2;
+        }
+    }
+
+    //
+    function consultarPersona() {
+        //
+        $idPer = $this->input->post("idPer");
+        //
+        $query = $this->db->query("select per_id, per_nombre, per_estado from "
+                . "personas_temp WHERE per_id = $idPer");
+        //
+        $datos = array();
+        //
+        if (count($query->result()) > 0) {
+            //
+            foreach ($query->result() as $row) {
                 //
-                if ($row->NombrePaciente === '') {
+                array_push($datos, array(
+                    'idPer' => $row->per_id,
+                    'nombre' => $row->per_nombre,
+                    'estado' => $row->per_estado
+                ));
+                //
+                if ($row->per_estado === '1') {
                     //
-                    $nombre = $row->Turno;
-                    $tipo = 'TURNO';
-                } else {
-                    //
-                    $nombre = $row->NombrePaciente;
-                    $tipo = 'PACIENTE';
+                    $this->db->delete('personas_temp', array('per_id' => $row->per_id));
                 }
-                //
-                $datosTemp = array(
-                    'idtv' => $row->IdTv,
-                    'nombrePaciente' => $row->NombrePaciente,
-                    'modulo' => $row->Modulo,
-                    'servicio' => $row->Servicio,
-                    'turno' => $row->Turno,
-                    'descripcion' => $row->Descripcion,
-                    'estado' => $row->Estado,
-                    'nombre' => $nombre,
-                    'tipo' => $tipo
-                );
-                //
-                array_push($datos, $datosTemp);
-                //
-                $this->db->delete('tv', array('IdTv' => $row->IdTv));
             }
             //
             return $datos;
@@ -114,8 +124,8 @@ class Visualizador extends CI_Model {
         $empresa = $this->input->post("empresa");
         //
         $query = $this->db->query("select mensaje, TamanoLetra, nombreLogo, "
-                . "CambioTv, VolumenVoz, IpVisualizador, id from configtv"
-                . " where estado = $visualizador and emp_id = $empresa");
+                . "CambioTv, VolumenVoz, IpVisualizador, id, imagen from "
+                . "configtv where estado = $visualizador and emp_id = $empresa");
         //
         $datos = array();
         //
@@ -130,7 +140,8 @@ class Visualizador extends CI_Model {
                     'cambioTv' => $row->CambioTv,
                     'volumenVoz' => $row->VolumenVoz,
                     'ipVisualizador' => $row->IpVisualizador,
-                    'id' => $row->id
+                    'id' => $row->id,
+                    'imagen' => $row->imagen
                 );
                 //
                 array_push($datos, $datosTemp);
@@ -166,6 +177,43 @@ class Visualizador extends CI_Model {
                 //
                 array_push($datos, $datosTemp);
             }
+            //
+            return $datos;
+        } else {
+            //
+            return 2;
+        }
+    }
+
+    //
+    function cargarMensajes() {
+        //
+        $visualizador = $this->input->post("visualizador");
+        $empresa = $this->input->post("empresa");
+        //
+        date_default_timezone_set('America/Bogota');
+        $hora = date('G:i');
+        $hora2s = strtotime('+1 minute', strtotime($hora));
+        $hora2 = date('G:i', $hora2s);
+        //
+        $query = $this->db->query("select men_mensaje from mensajes_temp where "
+                . "vis_id = $visualizador and emp_id = $empresa and men_hora "
+                . "BETWEEN '$hora' AND '$hora2'");
+        //
+        $datos = array();
+        //
+        if (count($query->result()) > 0) {
+            //
+            foreach ($query->result() as $row) {
+                //
+                array_push($datos, array(
+                    'mensaje' => $row->men_mensaje
+                ));
+            }
+            //
+            $query = $this->db->query("delete from mensajes_temp where vis_id ="
+                    . " $visualizador and emp_id = $empresa and men_hora "
+                    . "BETWEEN '$hora' AND '$hora2'");
             //
             return $datos;
         } else {
