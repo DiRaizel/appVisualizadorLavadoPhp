@@ -191,14 +191,8 @@ class Visualizador extends CI_Model {
         $visualizador = $this->input->post("visualizador");
         $empresa = $this->input->post("empresa");
         //
-        date_default_timezone_set('America/Bogota');
-        $hora = date('G:i');
-        $hora2s = strtotime('+1 minute', strtotime($hora));
-        $hora2 = date('G:i', $hora2s);
-        //
         $query = $this->db->query("select men_mensaje from mensajes_temp where "
-                . "vis_id = $visualizador and emp_id = $empresa and men_hora "
-                . "BETWEEN '$hora' AND '$hora2'");
+                . "vis_id = $visualizador and emp_id = $empresa");
         //
         $datos = array();
         //
@@ -212,8 +206,7 @@ class Visualizador extends CI_Model {
             }
             //
             $query = $this->db->query("delete from mensajes_temp where vis_id ="
-                    . " $visualizador and emp_id = $empresa and men_hora "
-                    . "BETWEEN '$hora' AND '$hora2'");
+                    . " $visualizador and emp_id = $empresa");
             //
             return $datos;
         } else {
